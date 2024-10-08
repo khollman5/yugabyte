@@ -1,0 +1,92 @@
+# Taken directly from:
+# https://download.yugabyte.com/#linux
+
+https://docs.yugabyte.com/preview/quick-start/linux/
+https://docs.yugabyte.com/preview/deploy/manual-deployment/
+
+sudo mkdir /usr/local/yugabyte
+sudo chown -R khollman:khollman yugabyte
+
+wget https://downloads.yugabyte.com/releases/2.19.2.0/yugabyte-2.19.2.0-b121-linux-x86_64.tar.gz
+
+ls -lrt 
+total 374720
+-rw-rw-r-- 1 khollman khollman 383710385 sep 11 21:32 yugabyte-2.19.2.0-b121-linux-x86_64.tar.gz
+
+
+tar xvfz yugabyte-2.19.2.0-b121-linux-x86_64.tar.gz && cd yugabyte-2.19.2.0/
+
+ls -lrt 
+total 548
+-rw-r--r-- 1 khollman khollman 230807 sep  6 21:42 tserver_flags.xml
+-rw-r--r-- 1 khollman khollman 279412 sep  6 21:45 master_flags.xml
+-rw-r--r-- 1 khollman khollman   4446 sep  6 22:37 auto_flags.json
+drwxr-xr-x 6 khollman khollman   4096 sep  6 22:43 www
+drwxr-xr-x 2 khollman khollman   4096 sep  6 22:43 tools
+drwxr-xr-x 4 khollman khollman   4096 sep  6 22:43 share
+drwxr-xr-x 3 khollman khollman   4096 sep  6 22:43 pylib
+drwxr-xr-x 6 khollman khollman   4096 sep  6 22:43 postgres
+drwxr-xr-x 5 khollman khollman   4096 sep  6 22:43 lib
+drwxr-xr-x 4 khollman khollman   4096 sep  6 22:43 linuxbrew
+drwxr-xr-x 2 khollman khollman   4096 sep  6 22:43 bin
+-rw-r--r-- 1 khollman khollman    317 sep  6 23:26 version_metadata.json
+
+
+./bin/post_install.sh
+./bin/yugabyted start
+
+/usr/local/yugabyte/yugabyte-2.19.2.0/./bin/yugabyted:13: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+  from distutils.spawn import find_executable
+Starting yugabyted...
+✅ YugabyteDB Started                  
+✅ UI ready         
+✅ Data placement constraint successfully verified                 
+
+⚠ WARNINGS:
+- ntp/chrony package is missing for clock synchronization. For centos 7, we recommend installing either ntp or chrony package and for centos 8, we recommend installing chrony package.
+- Transparent hugepages disabled. Please enable transparent_hugepages.
+- Cluster started in an insecure mode without authentication and encryption enabled. For non-production use only, not to be used without firewalls blocking the internet traffic.
+Please review the 'Quick start for Linux' docs and rerun the start command: https://docs.yugabyte.com/preview/quick-start/linux/
+
+
++----------------------------------------------------------------------------------------------------------+
+|                                                yugabyted                                                 |
++----------------------------------------------------------------------------------------------------------+
+| Status              : Running.                                                                           |
+| Replication Factor  : 1                                                                                  |
+| YugabyteDB UI       : http://127.0.1.1:15433                                                             |
+| JDBC                : jdbc:postgresql://127.0.1.1:5433/yugabyte?user=yugabyte&password=yugabyte                   |
+| YSQL                : bin/ysqlsh -h 127.0.1.1  -U yugabyte -d yugabyte                                   |
+| YCQL                : bin/ycqlsh 127.0.1.1 9042 -u cassandra                                             |
+| Data Dir            : /home/khollman/var/data                                                            |
+| Log Dir             : /home/khollman/var/logs                                                            |
+| Universe UUID       : 6ae5c284-8a04-44dc-bdba-cf7d748dccfd                                               |
++----------------------------------------------------------------------------------------------------------+
+🚀 YugabyteDB started successfully! To load a sample dataset, try 'yugabyted demo'.
+🎉 Join us on Slack at https://www.yugabyte.com/slack
+👕 Claim your free t-shirt at https://www.yugabyte.com/community-rewards/
+
+
+
+./bin/ysqlsh
+./bin/ysqlsh -h 127.0.1.1
+
+# DISTRIBUTED SQL IN ACTION
+1. LOAD SAMPLE DATASET
+
+yugabyte=# CREATE DATABASE yb_demo;
+yugabyte=# \c yb_demo;
+
+yb_demo=# \i share/schema.sql
+yb_demo=# \i share/products.sql
+yb_demo=# \i share/users.sql
+yb_demo=# \i share/orders.sql
+yb_demo=# \i share/reviews.sql
+
+2. RUN QUERIES
+yb_demo=# SELECT users.id, users.name, users.email, orders.id, orders.total FROM orders INNER JOIN users ON orders.user_id=users.id LIMIT 10;
+
+\q
+
+./bin/yugabyted stop
+
